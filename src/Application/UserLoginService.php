@@ -15,9 +15,7 @@ class UserLoginService
         if (in_array($user, $this->getLoggedUsers())) {
             throw new Exception("User already logged in");
         }
-        else{
-            $this->loggedUsers[] = $user;
-        }
+        $this->loggedUsers[] = $user;
     }
 
     public function getLoggedUsers(): array
@@ -31,16 +29,12 @@ class UserLoginService
         return $facebookManager->getSessions();
     }
 
-    public function login(string $userName, string $password): string
+    public function login(string $userName, string $password, FacebookSessionManager $facebookManager): string
     {
-        $facebookManager = new FacebookSessionManager();
-        if ($facebookManager->login($userName, $password)){
+        if ($facebookManager->login($userName, $password)) {
             $this->manualLogin(new User($userName));
             return "Login correcto";
         }
-        else{
-            return "Login incorrecto";
-        }
+        return "Login incorrecto";
     }
-
 }

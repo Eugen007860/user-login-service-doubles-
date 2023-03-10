@@ -8,8 +8,9 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Util\Exception;
 use UserLoginService\Application\UserLoginService;
 use UserLoginService\Domain\User;
-use function PHPUnit\Framework\assertEquals;
+use UserLoginService\Infrastructure\FacebookSessionManager;
 
+use function PHPUnit\Framework\assertEquals;
 
 final class UserLoginServiceTest extends TestCase
 {
@@ -49,12 +50,16 @@ final class UserLoginServiceTest extends TestCase
 
     /**
      * @test
-    */
+     */
     public function shouldLoginWithFacebook()
     {
+        $stubFacebookManager = $this->createStub(FacebookSessionManager::class);
+
+        $stubFacebookManager->method("login")->willReturn(true);
+
         $userLoginService = new UserLoginService();
 
-        $loginResult = $userLoginService->login("Paco","Secreto123");
+        $loginResult = $userLoginService->login("Paco", "Secreto123", $stubFacebookManager);
 
         assertEquals($loginResult, "Login correcto");
     }
@@ -64,9 +69,13 @@ final class UserLoginServiceTest extends TestCase
      */
     public function shouldntAllowLoginWithFacebook()
     {
+        $stubFacebookManager = $this->createStub(FacebookSessionManager::class);
+
+        $stubFacebookManager->method("login")->willReturn(false);
+
         $userLoginService = new UserLoginService();
 
-        $loginResult = $userLoginService->login("Alfredo","123Secreto");
+        $loginResult = $userLoginService->login("Alfredo", "123Secreto", $stubFacebookManager);
 
         assertEquals($loginResult, "Login incorrecto");
     }
