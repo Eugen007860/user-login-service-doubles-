@@ -1,0 +1,14 @@
+grumphp:
+    tasks:
+        phpmd:
+            ruleset: ['cleancode', 'codesize', 'naming']
+        phpcs:
+            standard:
+              - 'PSR12'
+        phpunit:
+            config_file: ~
+            testsuite: ~
+            group: []
+            exclude_group: []
+            always_execute: false
+            order: null
