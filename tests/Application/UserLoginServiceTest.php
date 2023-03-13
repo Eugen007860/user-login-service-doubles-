@@ -19,7 +19,7 @@ final class UserLoginServiceTest extends TestCase
      */
     public function newUserShouldBeLogged()
     {
-        $userLoginService = new UserLoginService();
+        $userLoginService = new UserLoginService(new FacebookSessionManager());
 
         $user = new User("paco");
 
@@ -37,7 +37,7 @@ final class UserLoginServiceTest extends TestCase
 
         $this->expectExceptionMessage("User already logged in");
 
-        $userLoginService = new UserLoginService();
+        $userLoginService = new UserLoginService(new FacebookSessionManager());
 
         $user = new User("paco");
 
@@ -57,9 +57,9 @@ final class UserLoginServiceTest extends TestCase
 
         $stubFacebookManager->method("login")->willReturn(true);
 
-        $userLoginService = new UserLoginService();
+        $userLoginService = new UserLoginService($stubFacebookManager);
 
-        $loginResult = $userLoginService->login("Paco", "Secreto123", $stubFacebookManager);
+        $loginResult = $userLoginService->login("Paco", "Secreto123");
 
         assertEquals($loginResult, "Login correcto");
     }
@@ -73,9 +73,9 @@ final class UserLoginServiceTest extends TestCase
 
         $stubFacebookManager->method("login")->willReturn(false);
 
-        $userLoginService = new UserLoginService();
+        $userLoginService = new UserLoginService($stubFacebookManager);
 
-        $loginResult = $userLoginService->login("Alfredo", "123Secreto", $stubFacebookManager);
+        $loginResult = $userLoginService->login("Alfredo", "123Secreto");
 
         assertEquals($loginResult, "Login incorrecto");
     }
