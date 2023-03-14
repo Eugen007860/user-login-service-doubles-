@@ -51,6 +51,22 @@ final class UserLoginServiceTest extends TestCase
     /**
      * @test
      */
+    public function shouldGetTheExternalSession()
+    {
+        $stubFacebookManager = $this->createStub(FacebookSessionManager::class);
+
+        $stubFacebookManager->method("getSessions")->willReturn(10);
+
+        $userLoginService = new UserLoginService($stubFacebookManager);
+
+        $externalSession = $userLoginService->getExternalSessions();
+
+        $this-> assertEquals($externalSession, 10);
+    }
+
+    /**
+     * @test
+     */
     public function shouldLoginWithFacebook()
     {
         $stubFacebookManager = $this->createStub(FacebookSessionManager::class);
@@ -61,7 +77,11 @@ final class UserLoginServiceTest extends TestCase
 
         $loginResult = $userLoginService->login("Paco", "Secreto123");
 
-        assertEquals($loginResult, "Login correcto");
+        $expectedUser = new User("Paco");
+
+        $this->assertEquals($loginResult, "Login correcto");
+
+        $this->assertEquals(in_array($expectedUser, $userLoginService->getLoggedUsers()), true);
     }
 
     /**
@@ -77,6 +97,6 @@ final class UserLoginServiceTest extends TestCase
 
         $loginResult = $userLoginService->login("Alfredo", "123Secreto");
 
-        assertEquals($loginResult, "Login incorrecto");
+        $this->assertEquals($loginResult, "Login incorrecto");
     }
 }

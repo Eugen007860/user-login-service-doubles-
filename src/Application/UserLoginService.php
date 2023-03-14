@@ -9,11 +9,11 @@ use UserLoginService\Infrastructure\FacebookSessionManager;
 class UserLoginService
 {
     private array $loggedUsers = [];
-    private FacebookSessionManager $fsm;
+    private SessionManager $sessionManager;
 
-    public function __construct(FacebookSessionManager $externalFsm)
+    public function __construct(SessionManager $externalFsm)
     {
-        $this->fsm= $externalFsm;
+        $this->sessionManager = $externalFsm;
     }
 
     public function manualLogin(User $user): void
@@ -31,13 +31,12 @@ class UserLoginService
 
     public function getExternalSessions(): int
     {
-        $facebookManager = new FacebookSessionManager();
-        return $facebookManager->getSessions();
+        return $this->sessionManager->getSessions();
     }
 
     public function login(string $userName, string $password): string
     {
-        if ($this->fsm->login($userName, $password)) {
+        if ($this->sessionManager->login($userName, $password)) {
             $this->manualLogin(new User($userName));
             return "Login correcto";
         }
@@ -46,5 +45,7 @@ class UserLoginService
 }
 
 
-// Como buena practica deberiamos separar esta clase en dos ya que si no por el hecho de pasa fsm en el constructor
-// estamos obligados a usar un dummy, la forma de ahorrarnos el dummy seria separar esta clase en dos, quitandonos getExternalSessions.
+// Como buena practica deberiamos separar esta clase en dos ya
+// que si no por el hecho de pasa fsm en el constructor
+// estamos obligados a usar un dummy, la forma de ahorrarnos
+// el dummy seria separar esta clase en dos, quitandonos getExternalSessions.
