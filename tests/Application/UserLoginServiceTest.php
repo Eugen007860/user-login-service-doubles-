@@ -6,15 +6,17 @@ namespace UserLoginService\Tests\Application;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Util\Exception;
+use UserLoginService\Application\SessionManager;
 use UserLoginService\Application\UserLoginService;
 use UserLoginService\Domain\User;
 use UserLoginService\Infrastructure\FacebookSessionManager;
+use Mockery;
 
 use function PHPUnit\Framework\assertEquals;
 
 final class UserLoginServiceTest extends TestCase
 {
-    /**
+/**
      * @test
      */
     public function newUserShouldBeLogged()
@@ -33,9 +35,11 @@ final class UserLoginServiceTest extends TestCase
      */
     public function userIsAlreadyLoggedIn()
     {
-        $this->expectException(Exception::class);
+        $this
+            ->expectException(Exception::class);
 
-        $this->expectExceptionMessage("User already logged in");
+        $this
+            ->expectExceptionMessage("User already logged in");
 
         $userLoginService = new UserLoginService(new FacebookSessionManager());
 
@@ -53,9 +57,12 @@ final class UserLoginServiceTest extends TestCase
      */
     public function shouldGetTheExternalSession()
     {
-        $stubFacebookManager = $this->createStub(FacebookSessionManager::class);
+        $stubFacebookManager = $this
+            ->createStub(FacebookSessionManager::class);
 
-        $stubFacebookManager->method("getSessions")->willReturn(10);
+        $stubFacebookManager
+            ->method("getSessions")
+            ->willReturn(10);
 
         $userLoginService = new UserLoginService($stubFacebookManager);
 
@@ -63,19 +70,22 @@ final class UserLoginServiceTest extends TestCase
 
         $this-> assertEquals($externalSession, 10);
     }
-
     /**
      * @test
      */
     public function shouldLoginWithFacebook()
     {
-        $stubFacebookManager = $this->createStub(FacebookSessionManager::class);
+        $stubFacebookManager = $this
+            ->createStub(FacebookSessionManager::class);
 
-        $stubFacebookManager->method("login")->willReturn(true);
+        $stubFacebookManager
+            ->method("login")
+            ->willReturn(true);
 
         $userLoginService = new UserLoginService($stubFacebookManager);
 
-        $loginResult = $userLoginService->login("Paco", "Secreto123");
+        $loginResult = $userLoginService
+            ->login("Paco", "Secreto123");
 
         $expectedUser = new User("Paco");
 
@@ -89,14 +99,49 @@ final class UserLoginServiceTest extends TestCase
      */
     public function shouldntAllowLoginWithFacebook()
     {
-        $stubFacebookManager = $this->createStub(FacebookSessionManager::class);
+        $stubFacebookManager = $this
+            ->createStub(FacebookSessionManager::class);
 
-        $stubFacebookManager->method("login")->willReturn(false);
+        $stubFacebookManager->method("login")
+            ->willReturn(false);
 
         $userLoginService = new UserLoginService($stubFacebookManager);
 
         $loginResult = $userLoginService->login("Alfredo", "123Secreto");
 
         $this->assertEquals($loginResult, "Login incorrecto");
+    }
+
+    /**
+     * @test
+     */
+    public function shouldLogoutUser()
+    {
+        $mokery = new Mockery();
+        $sessionManager = $mokery->spy(SessionManager::class);
+        $userLoginService = new UserLoginService($sessionManager);
+        $user = new User("pepe");
+
+        $userLoginService->manualLogin($user);
+        $response = $userLoginService->logout($user);
+        $sessionManager->shouldHaveReceived()->logout("pepe");
+
+        $this->assertEquals($response, "Ok");
+    }
+
+    /**
+     * @test
+     */
+    public function shouldNotAllowLogoutUser()
+    {
+        $mokery = new Mockery();
+        $sessionManager = $mokery->spy(SessionManager::class);
+        $userLoginService = new UserLoginService($sessionManager);
+        $user = new User("pepe");
+
+        $response = $userLoginService->logout($user);
+        $sessionManager->shouldHaveReceived()->logout("pepe");
+
+        $this->assertEquals($response, "User not found");
     }
 }

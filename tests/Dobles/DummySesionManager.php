@@ -6,10 +6,9 @@ class DummySesionManager
 {
     public function getSessions(): int
     {
-
     }
 
-    public function login(string $userName, string $password): bool{
-
+    public function login(string $userName, string $password): bool
+    {
     }
 }
